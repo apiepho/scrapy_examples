@@ -3,14 +3,21 @@ from scrapy.selector import Selector
 from cl_test1.items  import CraigsListItem
 
 class cars(Spider):
-    name = "cars"
+    print "AAAA crawling: " + self.args
+    name = "craigslist"
     allowed_domains = ["fortcollins.craigslist.org"]
     start_urls = [
     "https://fortcollins.craigslist.org/search/cto"
     ]
 
+    def __init__ (self, domain=None, player_list=""):
+        self.allowed_domains = ['sports.yahoo.com']
+        self.start_urls = [
+            'http://sports.yahoo.com/nba/players',
+        ]
+        self.player_list= "%s" % player_list
+
     def parse(self,response):
-        print self.args
         sel = Selector(response)
         container_lists = sel.xpath('//li[@class="result-row"]')
         items = []
