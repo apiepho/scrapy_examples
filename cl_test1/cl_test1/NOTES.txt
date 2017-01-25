@@ -1,0 +1,20 @@
+
+1/25/2017
+
+brew install python
+pip install scrapy
+pip install scrapy-splash
+
+https://doc.scrapy.org/en/latest/topics/spiders.html
+
+
+# TODO
+# - command line for craigslist url, assume a search cut/paste
+# - parse domain from url
+# - identify all extensions for search
+# - parse multiple pages
+
+
+
+
+# - code login or fill and select (toward gc version)

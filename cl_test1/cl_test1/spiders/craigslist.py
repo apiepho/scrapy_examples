@@ -2,22 +2,43 @@ from scrapy.spiders  import Spider
 from scrapy.selector import Selector
 from cl_test1.items  import CraigsListItem
 
-class cars(Spider):
-    print "AAAA crawling: " + self.args
-    name = "craigslist"
-    allowed_domains = ["fortcollins.craigslist.org"]
-    start_urls = [
-    "https://fortcollins.craigslist.org/search/cto"
-    ]
+import scrapy
+import sys
 
-    def __init__ (self, domain=None, player_list=""):
-        self.allowed_domains = ['sports.yahoo.com']
-        self.start_urls = [
-            'http://sports.yahoo.com/nba/players',
-        ]
-        self.player_list= "%s" % player_list
+class Craigslist(Spider):
+    name = "craigslist"
+    allowed_domains = []
+    start_urls      = []
+
+    def usage(self):
+        print "Usage: scrapy crawl craigslist --nolog -a url=\"<some url>\""
+        pass
+
+    def __init__(self, url=None, category=None, *args, **kwargs):
+        super(Craigslist, self).__init__(*args, **kwargs)
+        try:
+            if url == None:
+                print "please provide a url"
+                raise Exception()
+            if (url.find("http://") == -1 and url.find("https://") == -1):
+                print "please provide a full url with http:// or https://"
+                raise Exception()
+
+            print "crawling: " + url
+            self.url             = url
+            self.category        = category
+            parts                = url.replace("http://", "").replace("https://", "").split('/')
+            domain               = parts[0]
+            self.allowed_domains = ['%s' % domain]
+            self.start_urls      = ['%s' % url]
+        except:
+            self.usage()
+            sys.exit()    # is there a better way?
+        print "..."
+        pass
 
     def parse(self,response):
+        print response.url
         sel = Selector(response)
         container_lists = sel.xpath('//li[@class="result-row"]')
         items = []
