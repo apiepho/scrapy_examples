@@ -9,9 +9,11 @@ class Craigslist(Spider):
     name = "craigslist"
     allowed_domains = []
     start_urls      = []
+    totalcount      = 0
+    currentcount    = 0
 
     def usage(self):
-        print "Usage: scrapy crawl craigslist --nolog -a url=\"<some url>\" -a category=<category|list>"
+        print "Usage: scrapy crawl craigslist -a url=\"<some url>\" -a category=<category|list> --nolog"
         pass
 
     def __init__(self, url=None, category=None, *args, **kwargs):
@@ -49,13 +51,10 @@ class Craigslist(Spider):
         print response.url
         sel = Selector(response)
         items = []
-        # need to get all pages
-        # test for ?s= in url, if not then
-        #   get totalcount
-        #   save as global
-        #   launch new request with ?s=0, ?s=100 etc
+
+        # check for list, if so, list all categories from main page
         if self.category == 'list':
-            print "listing categories."
+            print "listing categories:"
             container_lists = sel.css('a')
             for li in container_lists:
                 if li.extract().find("data-cat") != -1:
@@ -63,15 +62,43 @@ class Craigslist(Spider):
                 	href = li.css('a::attr(href)').extract()[0]
                 	desc = li.css('span::text').extract()[0]
                 	print("%-30s%-10s%s" % (desc, sym, href))
+            return
+
+        # check for first page of a category, if so, find total and start sequence of pages
+        elif response.url.find('?s=') == -1:
+            self.totalcount = int(sel.css('span[class=totalcount]::text').extract()[0])
+            print("totalcount  : %d" % self.totalcount)
+            next_page = "?s=%d" % self.currentcount
+            next_page = response.urljoin(next_page)
+            yield scrapy.Request(next_page, callback=self.parse)
+            return
+            
+        # this should be one of the sequence of pages, parse items and start next page
         else:
+            # select all rows
             container_lists = sel.css('li[class="result-row"]')
             for li in container_lists:
+                # build item
                 item = CraigsListItem()
                 item['description'] = li.css('p a::text').extract()[0]
                 item['location']    = li.css('p a::attr(href)').extract()[0]
                 item['time']        = li.css('p time::attr(datetime)').extract()[0]
                 items.append(item)
-        return items
+
+            # yield items, cannot use 'return items' because we are using yield and generators for next page
+            for item in items:
+                yield item
+                
+            # update count and start next page
+            self.currentcount += 100
+            if self.currentcount < self.totalcount:
+                next_page = "?s=%d" % self.currentcount
+                next_page = response.urljoin(next_page)
+                yield scrapy.Request(next_page, callback=self.parse)
+                return
+
+        # done
+        return
 
 
 
