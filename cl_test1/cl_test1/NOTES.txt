@@ -8,11 +8,6 @@ pip install scrapy-splash
 https://doc.scrapy.org/en/latest/topics/spiders.html
 
 
-# TODO
-# - command line for craigslist url, assume a search cut/paste
-# - parse domain from url
-# - identify all extensions for search
-# - parse multiple pages
 
 
 rm items.csv ; scrapy crawl craigslist -o items.csv -a url="https://fortcollins.craigslist.org" -a category=list --nolog ; tail items.csv
