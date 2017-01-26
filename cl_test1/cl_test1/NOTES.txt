@@ -15,6 +15,7 @@ https://doc.scrapy.org/en/latest/topics/spiders.html
 # - parse multiple pages
 
 
+rm items.csv ; scrapy crawl craigslist -o items.csv -a url="https://fortcollins.craigslist.org" -a category=list --nolog ; tail items.csv
 
 
 # - code login or fill and select (toward gc version)

@@ -10,10 +10,9 @@ import scrapy
 from scrapy.item import Item,Field
 
 class CraigsListItem(scrapy.Item):
-    ad_description = Field()
-    ad_title       = Field()
-    ad_location    = Field()
-    ad_time        = Field()
+    description = Field()
+    location    = Field()
+    time        = Field()
     # define the fields for your item here like:
     # name = scrapy.Field()
     pass

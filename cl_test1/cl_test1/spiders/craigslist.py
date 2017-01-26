@@ -49,15 +49,29 @@ class Craigslist(Spider):
         print response.url
         sel = Selector(response)
         items = []
+        # need to get all pages
+        # test for ?s= in url, if not then
+        #   get totalcount
+        #   save as global
+        #   launch new request with ?s=0, ?s=100 etc
         if self.category == 'list':
-            print "list feature not supported yet."
+            print "listing categories."
+            container_lists = sel.css('a')
+            for li in container_lists:
+                if li.extract().find("data-cat") != -1:
+                	sym  = li.css('a::attr(class)').extract()[0]
+                	href = li.css('a::attr(href)').extract()[0]
+                	desc = li.css('span::text').extract()[0]
+                	print("%-30s%-10s%s" % (desc, sym, href))
         else:
-            container_lists = sel.xpath('//li[@class="result-row"]')
+            container_lists = sel.css('li[class="result-row"]')
             for li in container_lists:
                 item = CraigsListItem()
-                #item['ad_title']       = li.xpath('div[@class="title"]/a/text()').extract()
-                #item['ad_location']    = li.xpath('div[@class="category-location"]/span/text()').extract()
-                #item['ad_time']        = li.xpath('div[@class="info"]/div[@class="creation-date"]/span/text()').extract()
-                item['ad_description'] = li.xpath('p/a/text()').extract()
+                item['description'] = li.css('p a::text').extract()[0]
+                item['location']    = li.css('p a::attr(href)').extract()[0]
+                item['time']        = li.css('p time::attr(datetime)').extract()[0]
                 items.append(item)
         return items
+
+
+
